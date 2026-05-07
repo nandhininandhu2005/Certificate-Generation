@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Certificate Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Online Certificate Generator</h1>
+      <form id="certificateForm">
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="text" name="regNo" placeholder="Reg No" required />
+        <input type="text" name="college" placeholder="College" required />
+        <input type="text" name="Department" placeholder="Department" required />
+        <input type="text" name="course" placeholder="Course" required />
+
+        <label for="trainingType">Training Type</label>
+        <select name="trainingType" required>
+          <option value="">-- Select Training Type --</option>
+          <option value="Internship Training">Internship Training</option>
+          <option value="Inplant Training">Inplant Training</option>
+        </select>
+
+        <label for="startDate">Start Date</label>
+        <input type="date" name="startDate" required />
+        <label for="endDate">End Date</label>
+        <input type="date" name="endDate" required />
+
+        <label for="company">Company</label>
+        <select name="company" required>
+          <option value="">-- Select Company --</option>
+          <option value="Training trains">Training trains</option>
+          <option value="Domainhostly">Domainhostly</option>
+          <option value="W3Appdevelopers">W3Appdevelopers</option>
+        </select>
+
+        <button type="submit">Generate Certificate</button>
+      </form>
+    </div>
+
+    <script>
+      document.getElementById("certificateForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const formatDate = (dateStr) => {
+          const date = new Date(dateStr);
+          const dd = String(date.getDate()).padStart(2, '0');
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const yyyy = date.getFullYear();
+          return `${dd}/${mm}/${yyyy}`;
+
+        };
+
+        const payload = {
+          certificateNo: Date.now(),
+          studentName: formData.get("name"),
+          regNo: formData.get("regNo"),
+          college: formData.get("college"),
+          Department: formData.get("Department"),
+          course: formData.get("course"),
+          trainingType: formData.get("trainingType"),
+          startDate: formatDate(formData.get("startDate")),
+          endDate: formatDate(formData.get("endDate")),
+          company: formData.get("company"),
+        };
+
+        try {
+          const res = await fetch("http://localhost:5000/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            alert("✅ Certificate generated!");
+            window.open("http://localhost:5000" + result.downloadUrl, "_blank");
+          } else {
+            alert("❌ Error: " + result.error);
+          }
+        } catch (err) {
+          alert("❌ Request failed: " + err.message);
+        }
+      });
+    </script>
+  </body>
+</html>
