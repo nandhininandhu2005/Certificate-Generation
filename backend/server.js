@@ -25,11 +25,10 @@ const BG_PATH = path.join(__dirname, 'assets', 'letterpad.png');
 // Ensure folders exist
 if (!fs.existsSync(CERT_DIR)) fs.mkdirSync(CERT_DIR, { recursive: true });
 
-// MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/certificates', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// ✅ FIX 1: Use Render MongoDB URL (fallback to local)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/certificates';
+
+mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
@@ -95,26 +94,25 @@ app.post('/generate', async (req, res) => {
     });
 
     // Paragraph Writing
-const para1 = [
-  { text: 'This is to inform that ', bold: false },
-  { text: studentName, bold: true },
-  { text: ' (Reg no: ', bold: false },
-  { text: regNo, bold: true },
-  { text: ') ', bold: false },
-  { text: Department, bold: true },
-  { text: ' and student of ', bold: false },
-  { text: college, bold: true },
-  { text: ' has attended a ', bold: false },
-  { text: course + ' ', bold: true },
-  { text: trainingType, bold: true },
-  { text: ' in our organization from ', bold: false },
-  { text: '(', bold: false },
-  { text: startDate, bold: true },
-  { text: ') to (', bold: false },
-  { text: endDate, bold: true },
-  { text: ').', bold: false },
-];
-
+    const para1 = [
+      { text: 'This is to inform that ', bold: false },
+      { text: studentName, bold: true },
+      { text: ' (Reg no: ', bold: false },
+      { text: regNo, bold: true },
+      { text: ') ', bold: false },
+      { text: Department, bold: true },
+      { text: ' and student of ', bold: false },
+      { text: college, bold: true },
+      { text: ' has attended a ', bold: false },
+      { text: course + ' ', bold: true },
+      { text: trainingType, bold: true },
+      { text: ' in our organization from ', bold: false },
+      { text: '(', bold: false },
+      { text: startDate, bold: true },
+      { text: ') to (', bold: false },
+      { text: endDate, bold: true },
+      { text: ').', bold: false },
+    ];
 
     const para2 = [
       { text: 'During this ', bold: false },
@@ -217,7 +215,9 @@ const para1 = [
 // Serve static PDFs
 app.use('/certificates', express.static(CERT_DIR));
 
-// Start server
-app.listen(5000, () => {
-  console.log("✅ Server running at http://localhost:5000");
+// ✅ FIX 2: Use Render PORT (CRITICAL FIX)
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
